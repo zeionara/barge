@@ -3,8 +3,8 @@
 function split_string {
     __separator=${2:-" "}
     __splittable_string=$1
-    echo splittable
-    echo $__splittable_string
+    # echo splittable
+    # echo $__splittable_string
     if [ "$__separator" != " " ]; then
         __splittable_string=$(echo $__splittable_string | sed "s/ /SPACE/g" | sed "s/$__separator/ /g")
     fi
@@ -45,6 +45,7 @@ function generate_option_handler {
 handler=$(cat <<- END
     -$option_short_name|--$option_full_name)
         i=\$((i + 1));
+        unset $option_value_holder;
         export $option_value_holder="\${command_line_options[\$i]}"
         ;;
 END
@@ -63,18 +64,18 @@ n_args=${#command_line_options[@]}
 for (( i=0; i<${n_args}; i++ )); do
     eval $handlers
 done
-echo $command_line_options
+# echo $command_line_options
 
-echo $FOO_BAR $BAZ_QUX
+# echo $FOO_BAR $BAZ_QUX
 
 options="foo-bar=f baz-qux=q"
 # options=((foo-bar, f), (baz-qux, q))
 eval "parsed_options=(${options})"
 
-for option in ${parsed_options[@]}; do
-   echo $option
+# for option in ${parsed_options[@]}; do
+   # echo $option
    # echo ${option[0]} ${option[1]}
-done 
+# done 
 
 # echo $(split_string "foo bar")
 # splittable_string="ffoo bar baz"
@@ -87,11 +88,11 @@ done
 # echo $(join_string "${splitted_string[@]}") 
 option_list="f|foo-bar q|baz-qux c|corge-grault"
 split_string "$option_list"
-echo splitted
-echo "${__items[@]}"
+# echo splitted
+# echo "${__items[@]}"
 parsed_options=()
 # j=0
-echo "${#__items[@]}"
+# echo "${#__items[@]}"
 for (( i=0; i<${#__items[@]}; i++ )); do
     parsed_options[$i]=${__items[$i]}
 done
@@ -101,11 +102,11 @@ for (( j=0; j<${#parsed_options[@]}; j++ )); do
     # echo $i
     # echo ssssss
     split_string ${parsed_options[$j]} "|"
-    echo $__items
+    # echo $__items
     option_handlers[$j]=$(generate_option_handler ${__items[1]} ${__items[0]})
     # echo ${parsed_options[$i]}
 done
-echo $option_handlers
+# echo $option_handlers
 
 __items=()
 for (( i=0; i<${#option_handlers[@]}; i++ )); do
@@ -114,15 +115,15 @@ done
 
 command_line_options_=${1:-'-f foo -q bar -c qux'}
 command_line_options=(${command_line_options_[@]})
-echo $2
-echo ppppp
-echo ${command_line_options[@]}
+# echo $2
+# echo ppppp
+# echo ${command_line_options[@]}
 handlers="case \"\${command_line_options[\$i]}\" in $(join_string) esac"
-echo $handlers
+# echo $handlers
 for (( i=0; i<${#command_line_options[@]}; i++ )); do
-    echo $i
-    echo ${command_line_options[$i]}
+    # echo $i
+    # echo ${command_line_options[$i]}
     eval $handlers
-    echo $CORGE_GRAULT
-    echo $i
+    # echo $CORGE_GRAULT
+    # echo $i
 done
