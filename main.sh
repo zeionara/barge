@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# while [[ $# -gt 0 ]]; do
-#     echo $1
-#     shift
-# done
+export BARGE_ROOT=$HOME/barge
+export BARGE_OPTIONS="f|foo-bar c|corge-grault garply"
+eval "source $BARGE_ROOT/parse.sh \"$@\""
 
-eval "source ./parse.sh \"$@\""
-echo $CORGE_GRAULT
-# echo hello world
+echo "CORGE_GRAULT=$CORGE_GRAULT"
+echo "FOO_BAR=$FOO_BAR"
+echo "GARPLY=$GARPLY"
+

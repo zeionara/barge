@@ -11,3 +11,9 @@ function copy_array {
     eval $command
 }
 
+function append {
+    __array_name=$1
+    __element=$2
+
+    eval "$__array_name[\${#$__array_name[@]}]='$__element'"
+}
