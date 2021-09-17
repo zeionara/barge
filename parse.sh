@@ -1,13 +1,20 @@
 #!/bin/bash
 
+# Cant use an explicit call to the procedure defined in other file because this file has not been imported yet
+# exit_if_not_set "BARGE_ROOT" "please declare the path to the root folder of the cloned barge repository"
+if [ -z $BARGE_ROOT ]; then
+    echo "BARGE_ROOT env variable is not specified; please declare the path to the root folder of the cloned barge repository"
+    exit 1 
+fi
+
 source $BARGE_ROOT/string-utils.sh
 source $BARGE_ROOT/handler-generators.sh
 source $BARGE_ROOT/array-utils.sh
+source $BARGE_ROOT/error-utils.sh
 
-if [ -z "$BARGE_OPTIONS" ]; then
-    echo "BARGE_OPTIONS env variable is not specified, please declare the list of supported arguments in format: '<foo-arg-short-name>|<foo-arg-full-name> <baz-arg-short-name>|<bar-arg-full-name>'"
-    exit 1
-fi
+exit_if_not_set "BARGE_OPTIONS" "please declare the list of supported arguments in format: '<foo-arg-short-name>|<foo-arg-full-name> <baz-arg-short-name>|<bar-arg-full-name>'" 
+# exit_if "[ -z \"\$BARGE_OPTIONS\" ]" \
+#     "BARGE_OPTIONS env variable is not specified, please declare the list of supported arguments in format: '<foo-arg-short-name>|<foo-arg-full-name> <baz-arg-short-name>|<bar-arg-full-name>'"
 
 # Generate handlers from the option list
 split_string "$BARGE_OPTIONS"
