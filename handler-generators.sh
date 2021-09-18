@@ -6,8 +6,7 @@ function generate_option_handler {
     option_short_name=$2 # TODO: Implement autogeneration
 
     # Generate variable name for the evironment variable hodling the parsed value and unset it
-    option_value_holder=$(echo ${option_full_name^^} | tr - _)
-    unset $option_value_holder
+    option_value_holder=$3
 
     # Generate option handler which can be used in the body of a case block (this chunk of code must not be reindented to avoid errors)
 handler=$(cat <<- END
@@ -31,8 +30,6 @@ function generate_flag_handler {
 
     # Generate variable name for the evironment variable hodling the parsed value and unset it
     option_value_holder=$3
-    # eval "export $option_value_holder=0"
-    # export PLUGH_XYYZY=2
 
     # Generate option handler which can be used in the body of a case block (this chunk of code must not be reindented to avoid errors)
 handler=$(cat <<- END

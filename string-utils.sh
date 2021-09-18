@@ -49,3 +49,34 @@ function as_constant_name {
     echo $(echo ${1^^} | tr - _)
 }
 
+function drop_brackets {
+    echo "$(echo "$1" | sed -E 's/\[|\]//g')"
+}
+
+function is_optional {
+    # echo ">$1<"
+    # && [ ${1:$((${#1} - 1)):1) == "]" ]; 
+    # input=$1
+    # echo ${1:$((${#1} - 1)):1}
+    __input_without_leading_spaces=$(echo "$1" | sed -E 's/^\s+|\s+$//g')
+    if [ ${__input_without_leading_spaces:0:1} = "[" ] && [ "${__input_without_leading_spaces:$((${#__input_without_leading_spaces} - 1)):1}" = "]" ]; then
+        __unwrapped_optional=$(drop_brackets "$1")
+        # echo ">$__unwrapped_optional<"
+        __input_length=${#1}
+        # echo $__input_length
+        __unwrapped_length=${#__unwrapped_optional}
+        __length_diff=$((__input_length - __unwrapped_length))
+        # echo $__length_diff
+        if [ $__length_diff -eq 2 ]; then
+            echo 1
+        elif [ $__length_diff -eq 0 ]; then
+            echo 0
+        else
+            echo "Incorrect brackets configuration"
+            exit 1
+        fi
+   else
+       echo 0
+   fi
+}
+
