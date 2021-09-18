@@ -2,6 +2,11 @@
 
 export BARGE_ROOT=$HOME/barge
 export BARGE_OPTIONS="[f|foo-bar ...] c|corge-grault ... garply [p|plugh-xyyzy]"
+__items=()
+for arg; do
+    echo $arg
+done
+echo "$#"
 eval "source $BARGE_ROOT/parse.sh \"$@\""
 
 echo "CORGE_GRAULT=$CORGE_GRAULT"

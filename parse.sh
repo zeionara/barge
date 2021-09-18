@@ -14,6 +14,7 @@ source $BARGE_ROOT/error-utils.sh
 exit_if_not_set "BARGE_OPTIONS" "please declare the list of supported arguments in format: '<foo-arg-short-name>|<foo-arg-full-name> <baz-arg-short-name>|<bar-arg-full-name>'" 
 
 # Generate handlers from the option list
+echo $BARGE_OPTIONS
 split_string "$BARGE_OPTIONS"
 
 # Save the result returned from the splitting function into another array to not to lose it after the next split operation
@@ -99,6 +100,7 @@ handlers="case \"\${command_line_options[i]}\" in $(join_string) *) append \"imp
 
 # Interpret passed command line arguments as an array of strings separated by space
 command_line_options_=${1:-'-f foo -q bar -c qux'}
+echo $command_line_options_
 command_line_options=(${command_line_options_[@]})
 
 # Execute the main loop of the arguments parsing
@@ -109,9 +111,12 @@ done
 
 # Assign implicit arg values to appropriate variables
 for (( i=0; i<${#implicit_arg_keepers[@]}; i++ )); do
-    eval "export ${implicit_arg_keepers[i]}=\"${implicit_args[i]}\""
+    implicit_arg_value="${implicit_args[i]}"
+    exit_if "[ \"${implicit_arg_value:0:1}\" == "-" ]" "Unknown option $implicit_arg_value"
+    export ${implicit_arg_keepers[i]}="${implicit_arg_value}"
 done
 
+# Ensure that all required values were provided
 for required_option_keeper in ${required_options[@]}; do
     exit_if_not_set "$required_option_keeper" "required option $required_option_keeper is not set, please add the respective value to the call"
 done
