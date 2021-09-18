@@ -29,10 +29,22 @@ copy_array __items parsed_options
 # Generate option handlers and save them into an array
 option_handlers=()
 implicit_arg_keepers=()
+j_=0
 for (( j=0; j<${#parsed_options[@]}; j++ )); do
-    split_string ${parsed_options[$j]} "|"
-    if [ ${#__items[@]} -eq 2 ]; then
-        option_handlers[$j]=$(generate_option_handler ${__items[1]} ${__items[0]})
+    current_option=${parsed_options[j]}
+    next_option=${parsed_options[$((j + 1))]}
+
+    # if [ "$next_option" == "garply" ] && [ ${#__items[@]} -eq 2 ]; then
+    #     echo hey, it is garply!
+    # fi
+    # echo $next_option
+    split_string "$current_option" "|"
+    # if [ ${#__items[@]} -eq 2 ]; then
+    if [ "$next_option" == "..." ] && [ ${#__items[@]} -eq 2 ]; then
+        # echo $current_option $next_option
+        option_handlers[$j_]=$(generate_option_handler ${__items[1]} ${__items[0]})
+        j_=$((j_ + 1))
+        j=$((j + 1))
     elif [ ${#__items[@]} -eq 1 ]; then
         arg_keeper=$(echo ${parsed_options[j]^^} | tr - _)
         append "implicit_arg_keepers" "$arg_keeper"
@@ -44,6 +56,7 @@ done
 # Join option handlers into a sting thus making an executable case block which will parse incoming arguments
 copy_array option_handlers __items
 handlers="case \"\${command_line_options[i]}\" in $(join_string) *) append \"implicit_args\" \"\${command_line_options[i]}\" ;; esac"
+# echo $handlers
 
 # Interpret passed command line arguments as an array of strings separated by space
 command_line_options_=${1:-'-f foo -q bar -c qux'}
