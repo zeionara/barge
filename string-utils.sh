@@ -44,3 +44,8 @@ function join_string {
     echo $__joined_string
 }
 
+function as_constant_name {
+    # The function allows to convert a string from format conveniet for passing value through cli interface to representation which applied for naming constants in bash scripts
+    echo $(echo ${1^^} | tr - _)
+}
+

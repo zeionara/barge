@@ -30,6 +30,7 @@ copy_array __items parsed_options
 option_handlers=()
 implicit_arg_keepers=()
 j_=0
+FOO_BAR=2
 for (( j=0; j<${#parsed_options[@]}; j++ )); do
     current_option=${parsed_options[j]}
     next_option=${parsed_options[$((j + 1))]}
@@ -40,13 +41,25 @@ for (( j=0; j<${#parsed_options[@]}; j++ )); do
     # echo $next_option
     split_string "$current_option" "|"
     # if [ ${#__items[@]} -eq 2 ]; then
-    if [ "$next_option" == "..." ] && [ ${#__items[@]} -eq 2 ]; then
-        # echo $current_option $next_option
-        option_handlers[$j_]=$(generate_option_handler ${__items[1]} ${__items[0]})
-        j_=$((j_ + 1))
-        j=$((j + 1))
+    if [ ${#__items[@]} -eq 2 ]; then
+        if [ "$next_option" == "..." ]; then
+            # echo $current_option $next_option
+            arg_keeper=$(as_constant_name ${__items[1]})
+            unset $arg_keeper
+            option_handlers[$j_]=$(generate_option_handler ${__items[1]} ${__items[0]} $arg_keeper)
+            j_=$((j_ + 1))
+            j=$((j + 1))
+        else
+            # echo "handling flag"
+            # PLUGH_XYYZY=12
+            arg_keeper=$(as_constant_name ${__items[1]})
+            export $arg_keeper=0
+            option_handlers[$j_]=$(generate_flag_handler ${__items[1]} ${__items[0]} $arg_keeper)
+            # echo $PLUGH_XYYZY
+            j_=$((j_ + 1))
+        fi
     elif [ ${#__items[@]} -eq 1 ]; then
-        arg_keeper=$(echo ${parsed_options[j]^^} | tr - _)
+        arg_keeper=$(as_constant_name ${parsed_options[j]}) # $(echo ${parsed_options[j]^^} | tr - _)
         append "implicit_arg_keepers" "$arg_keeper"
         unset $arg_keeper
         # echo ${implicit_arg_keepers[@]}
