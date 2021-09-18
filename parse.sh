@@ -14,7 +14,7 @@ source $BARGE_ROOT/error-utils.sh
 exit_if_not_set "BARGE_OPTIONS" "please declare the list of supported arguments in format: '<foo-arg-short-name>|<foo-arg-full-name> <baz-arg-short-name>|<bar-arg-full-name>'" 
 
 # Generate handlers from the option list
-echo $BARGE_OPTIONS
+# echo $BARGE_OPTIONS
 split_string "$BARGE_OPTIONS"
 
 # Save the result returned from the splitting function into another array to not to lose it after the next split operation
@@ -100,8 +100,15 @@ handlers="case \"\${command_line_options[i]}\" in $(join_string) *) append \"imp
 
 # Interpret passed command line arguments as an array of strings separated by space
 command_line_options_=${1:-'-f foo -q bar -c qux'}
-echo $command_line_options_
+space_replacement=$2
+# echo $command_line_options_
 command_line_options=(${command_line_options_[@]})
+
+if [ ! -z $space_replacement ]; then
+    for (( i=0; i<${#command_line_options[@]}; i++ )); do
+        command_line_options[$i]="$(echo "${command_line_options[i]}" | sed "s/$space_replacement/ /g")"
+    done
+fi
 
 # Execute the main loop of the arguments parsing
 implicit_args=() 
