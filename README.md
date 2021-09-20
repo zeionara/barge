@@ -19,19 +19,24 @@ For using the script you need to define two environment variables - one for sett
 export BARGE_ROOT=$HOME/barge
 export BARGE_OPTIONS="[f|foo-bar ...] c|corge-grault ... garply [p|plugh-xyyzy]"
 
-input_line=""
-space_replacement="SPACE"
+space_replacement="<<SPACE>>"
 
-for arg; do
-    arg_with_replaced_spaces="$(echo "$arg" | sed -E "s/\s/$space_replacement/g")"
-    if [ "$input_line" == "" ]; then
-        input_line="$arg_with_replaced_spaces"
-    else
-        input_line="$input_line $arg_with_replaced_spaces"
-    fi
-done
+if [ -z $space_replacement ]; then
+    eval "source $BARGE_ROOT/parse.sh \"$@\""
+else
+    input_line=""
 
-source $BARGE_ROOT/parse.sh "$input_line" "$space_replacement"
+    for arg; do
+        arg_with_replaced_spaces="$(echo "$arg" | sed -E "s/\s/$space_replacement/g")"
+        if [ "$input_line" == "" ]; then
+            input_line="$arg_with_replaced_spaces"
+        else
+            input_line="$input_line $arg_with_replaced_spaces"
+        fi
+    done
+
+    source $BARGE_ROOT/parse.sh "$input_line" "$space_replacement"
+fi
 
 echo "CORGE_GRAULT='$CORGE_GRAULT'"
 echo "FOO_BAR='$FOO_BAR'"
@@ -74,7 +79,7 @@ For completeness, let's see what happens if we pass the wrong set of attributes 
 ./main.sh -p quux --foo-bar `qu ux     `
 ```
 
-If we try to run this command, the user obtains a comprehensive message and the script immediately terminates which prevents further execution for avoiding unexpected errors because of missing values:
+If we try to run this command, we will obtain a comprehensive message and the script will immediately terminate which prevents further execution for avoiding unexpected errors because of missing values:
 
 ```sh
 CORGE_GRAULT env variable is not specified; required option CORGE_GRAULT is not set, please add the respective value to the call

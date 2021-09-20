@@ -6,31 +6,22 @@ if [ -z $BARGE_ROOT ]; then
     exit 1 
 fi
 
-source $BARGE_ROOT/string-utils.sh
+source $BARGE_ROOT/utils/string.sh
 source $BARGE_ROOT/handler-generators.sh
-source $BARGE_ROOT/array-utils.sh
-source $BARGE_ROOT/error-utils.sh
+source $BARGE_ROOT/utils/array.sh
+source $BARGE_ROOT/utils/errors.sh
 
 exit_if_not_set "BARGE_OPTIONS" "please declare the list of supported arguments in format: '<foo-arg-short-name>|<foo-arg-full-name> <baz-arg-short-name>|<bar-arg-full-name>'" 
 
 # Generate handlers from the option list
-# echo $BARGE_OPTIONS
 split_string "$BARGE_OPTIONS"
 
 # Save the result returned from the splitting function into another array to not to lose it after the next split operation
 copy_array __items parsed_options
 
-# n=$(is_optional "[aa]")
-# echo $n
-# if [ $n -eq 0 ]; then
-# 
-#     echo "Is not optional"
-# fi
 function unwrap_optional_and_set_flag {
     joined_options="$current_option $next_option"
     is_optional_execution_result=$(is_optional "$joined_options")
-    # echo $joined_options
-    # echo $is_optional_execution_result
 
     if [ $is_optional_execution_result -eq 1 ]; then
        __unwrapped_optional=$(drop_brackets "$joined_options")
@@ -42,26 +33,18 @@ function unwrap_optional_and_set_flag {
     else
        is_optional_execution_result=0
     fi 
-    # echo $current_option $next_option $is_optional_execution_result
 }
+
 # Generate option handlers and save them into an array
 option_handlers=()
 implicit_arg_keepers=()
-j_=0
+j_=0 # Index for current option handler
 required_options=()
-k=0
+k=0 # Index for current required option keeper (env variable name which later can be checked for emptiness)
 for (( j=0; j<${#parsed_options[@]}; j++ )); do
     current_option=${parsed_options[j]}
     next_option=${parsed_options[$((j + 1))]}
 
-    # joined_options="$current_option $next_option"
-    # echo $joined_options
-    # is_optional_execution_result=$(is_optional "$joined_options")
-    # echo $is_optional_execution_result
-    # if [ $(is_optional "$current_option $next_option") -eq 1 ]; then
-    #    __unwrapped_optional=$(drop_brackets "$joined_options")
-    #    echo $__unwrapped_optional
-    # fi 
     unwrap_optional_and_set_flag
     
     split_string "$current_option" "|"
@@ -92,7 +75,6 @@ for (( j=0; j<${#parsed_options[@]}; j++ )); do
         fi
     fi
 done
-# echo ${required_options[@]}
 
 # Join option handlers into a sting thus making an executable case block which will parse incoming arguments
 copy_array option_handlers __items
@@ -101,7 +83,6 @@ handlers="case \"\${command_line_options[i]}\" in $(join_string) *) append \"imp
 # Interpret passed command line arguments as an array of strings separated by space
 command_line_options_=${1:-'-f foo -q bar -c qux'}
 space_replacement=$2
-# echo $command_line_options_
 command_line_options=(${command_line_options_[@]})
 
 if [ ! -z $space_replacement ]; then

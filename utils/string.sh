@@ -21,7 +21,7 @@ function split_string {
         done
     fi
 
-    # Function exection result is saved into the __items variable
+    # Function exection result is saved into the __items variable, there is no returned value
 }
 
 function join_string {
@@ -54,22 +54,17 @@ function drop_brackets {
 }
 
 function is_optional {
-    # echo ">$1<"
-    # && [ ${1:$((${#1} - 1)):1) == "]" ]; 
-    # input=$1
-    # echo ${1:$((${#1} - 1)):1}
     __input_without_leading_spaces=$(echo "$1" | sed -E 's/^\s+|\s+$//g')
     if [ ${__input_without_leading_spaces:0:1} = "[" ] && [ "${__input_without_leading_spaces:$((${#__input_without_leading_spaces} - 1)):1}" = "]" ]; then
+
         __unwrapped_optional=$(drop_brackets "$1")
-        # echo ">$__unwrapped_optional<"
         __input_length=${#1}
-        # echo $__input_length
         __unwrapped_length=${#__unwrapped_optional}
         __length_diff=$((__input_length - __unwrapped_length))
-        # echo $__length_diff
+
         if [ $__length_diff -eq 2 ]; then
             echo 1
-        elif [ $__length_diff -eq 0 ]; then
+        elif [ $__length_diff -eq 0 ]; then # This outcome is impossible because earlier we've already checked that there are openinng and closing square brackets in the string
             echo 0
         else
             echo "Incorrect brackets configuration"

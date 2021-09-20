@@ -24,7 +24,6 @@ END
 
 function generate_flag_handler {
     # This function takes two parameters - then full name of the handled argument and the short name
-    # PLUGH_XYYZY=2
     option_full_name=$1    
     option_short_name=$2 # TODO: Implement autogeneration
 
