@@ -81,10 +81,9 @@ copy_array option_handlers __items
 handlers="case \"\${command_line_options[i]}\" in $(join_string) *) append \"implicit_args\" \"\${command_line_options[i]}\" ;; esac"
 
 # Interpret passed command line arguments as an array of strings separated by space
-command_line_options_=${1:-'-f foo -q bar -c qux'}
+command_line_options_=$1
 space_replacement=$2
 command_line_options=(${command_line_options_[@]})
-
 if [ ! -z $space_replacement ]; then
     for (( i=0; i<${#command_line_options[@]}; i++ )); do
         command_line_options[$i]="$(echo "${command_line_options[i]}" | sed "s/$space_replacement/ /g")"
