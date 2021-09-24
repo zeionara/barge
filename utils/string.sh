@@ -55,16 +55,17 @@ function drop_brackets {
 
 function is_optional {
     __input_without_leading_spaces=$(echo "$1" | sed -E 's/^\s+|\s+$//g')
-    if [ ${__input_without_leading_spaces:0:1} = "[" ] && [ "${__input_without_leading_spaces:$((${#__input_without_leading_spaces} - 1)):1}" = "]" ]; then
+    __lacks_closing_bracket=$2
+    if [ ${__input_without_leading_spaces:0:1} = "[" ] && ( [ $__lacks_closing_bracket -eq 1 ] || [ "${__input_without_leading_spaces:$((${#__input_without_leading_spaces} - 1)):1}" = "]" ] ) ; then
 
         __unwrapped_optional=$(drop_brackets "$1")
         __input_length=${#1}
         __unwrapped_length=${#__unwrapped_optional}
         __length_diff=$((__input_length - __unwrapped_length))
 
-        if [ $__length_diff -eq 2 ]; then
+        if [ $__length_diff -eq 2 ] || ( [ $__lacks_closing_bracket -eq 1 ] && [ $__length_diff -eq 1 ] ); then
             echo 1
-        elif [ $__length_diff -eq 0 ]; then # This outcome is impossible because earlier we've already checked that there are openinng and closing square brackets in the string
+        elif [ $__length_diff -eq 0 ]; then # This outcome is impossible because earlier we've already checked that there are opening and closing square brackets in the string
             echo 0
         else
             echo "Incorrect brackets configuration"
@@ -73,5 +74,15 @@ function is_optional {
    else
        echo 0
    fi
+}
+
+function drop_trailing_bracket {
+    __input=$1
+
+    if [ "${__input:$((${#__input} - 1)):1}" == "]" ]; then
+        echo "${__item:0:$((${#item} - 1))}"
+    else
+        echo "$__input"
+    fi
 }
 

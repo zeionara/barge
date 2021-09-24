@@ -1,7 +1,7 @@
 #!/bin/bash
 
 export BARGE_ROOT=$HOME/barge
-export BARGE_OPTIONS="[f|foo-bar ...] c|corge-grault ... garply [p|plugh-xyyzy]"
+export BARGE_OPTIONS="[f|foo-bar ... = 'baz qux'] c|corge-grault ... [garply = garply] [p|plugh-xyyzy = oops]"
 
 space_replacement="<<SPACE>>"
 
