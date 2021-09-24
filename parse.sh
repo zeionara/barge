@@ -23,14 +23,14 @@ function unwrap_optional_and_set_flag {
     joined_options="$current_option $next_option"
     is_optional_execution_result=$(is_optional "$joined_options" $__dropped_trailing_bracket)
 
-    echo $__dropped_trailing_bracket
-    echo "Check optional $joined_options"
+    # echo $__dropped_trailing_bracket
+    # echo "Check optional $joined_options"
     if [ $is_optional_execution_result -eq 1 ]; then
        __unwrapped_optional=$(drop_brackets "$joined_options")
        split_string "$__unwrapped_optional"
 
        current_option=${__items[0]}
-       echo "CURR $current_option"
+       # echo "CURR $current_option"
        next_option=${__items[1]}
        is_optional_execution_result=1
     else
@@ -48,7 +48,7 @@ function fetch_default_argument {
     __n_joined_strings=0
     for (( __j=$1; __j<$__array_length; __j++ )); do
         eval "__item=\${$__array_name[$__j]}"
-        echo "FETCHING $__item"
+        # echo "FETCHING $__item"
         __n_joined_strings=$((__n_joined_strings + 1))
         
         if [ "${__item:0:1}" == "'" ]; then
@@ -101,16 +101,16 @@ for (( j=0; j<${#parsed_options[@]}; j++ )); do
     # echo ">$following_option<"
     if [ "${next_option:0:1}" != "[" ] && [ "$following_option" == "=" ]; then
         fetch_default_argument $((j + 3)) 'parsed_options'
-        echo "next before = $next_option"
-        echo "default argument = $__default_argument"
+        # echo "next before = $next_option"
+        # echo "default argument = $__default_argument"
     fi
 
     if [ "$next_option" == "=" ]; then
         fetch_default_argument $((j + 2)) 'parsed_options'
-        echo "default argument = $__default_argument"
+        # echo "default argument = $__default_argument"
     fi
 
-    echo $current_option $next_option
+    # echo $current_option $next_option
     # echo $following_option
     # echo $__n_joined_strings
     # echo $__dropped_trailing_bracket
@@ -119,7 +119,7 @@ for (( j=0; j<${#parsed_options[@]}; j++ )); do
     # echo $is_optional_execution_result
     # exit 1
     
-    echo "SPLT $current_option"
+    # echo "SPLT $current_option"
     split_string "$current_option" "|"
     if [ ${#__items[@]} -eq 2 ]; then
         if [ "$next_option" == "..." ]; then
@@ -153,14 +153,14 @@ for (( j=0; j<${#parsed_options[@]}; j++ )); do
         fi
     elif [ ${#__items[@]} -eq 1 ]; then
         arg_keeper=$(as_constant_name $current_option)
-        echo "DEF $__default_argument"
+        # echo "DEF $__default_argument"
         append "implicit_arg_keepers" "$arg_keeper"
         if [ ! -z "$__default_argument" ]; then
             eval "export $arg_keeper=$__default_argument"
         else
             unset $arg_keeper
         fi
-        echo $GARPLY
+        # echo $GARPLY
         # unset $arg_keeper
         if [ $is_optional_execution_result -eq 0 ]; then
             required_options[$k]=$arg_keeper
@@ -176,7 +176,7 @@ for (( j=0; j<${#parsed_options[@]}; j++ )); do
         j=$((j + $__n_joined_strings + 1))
     fi
 done
-echo "GPL=$GARPLY"
+# echo "GPL=$GARPLY"
 # Join option handlers into a sting thus making an executable case block which will parse incoming arguments
 copy_array option_handlers __items
 handlers="case \"\${command_line_options[i]}\" in $(join_string) *) append \"implicit_args\" \"\${command_line_options[i]}\" ;; esac"
@@ -200,11 +200,13 @@ done
 # Assign implicit arg values to appropriate variables
 for (( i=0; i<${#implicit_arg_keepers[@]}; i++ )); do
     implicit_arg_value="${implicit_args[i]}"
-    echo "============================="
     exit_if "[ \"${implicit_arg_value:0:1}\" == "-" ]" "Unknown option $implicit_arg_value"
-    export ${implicit_arg_keepers[i]}="${implicit_arg_value}"
+    if [ ! -z "$implicit_arg_value" ]; then
+        # echo "============================="
+        export ${implicit_arg_keepers[i]}="${implicit_arg_value}"
+    fi
 done
-echo "GAPL=$GARPLY"
+# echo "GAPL=$GARPLY"
 
 # Ensure that all required values were provided
 for required_option_keeper in ${required_options[@]}; do
