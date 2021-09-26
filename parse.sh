@@ -59,7 +59,11 @@ function fetch_default_argument {
                 __passed_first_item='yes'
             fi
             # echo "multipart"
-            __default_argument="$__item"
+            __item_without_trailing_bracket="$(drop_trailing_bracket $__item)"
+            if [ $__item != $__item_without_trailing_bracket ]; then
+                __dropped_trailing_bracket=1
+            fi
+            __default_argument="$__item_without_trailing_bracket"
         elif [ -z $__passed_first_item ]; then
             # echo "non-multipart"
             __item_without_trailing_bracket="$(drop_trailing_bracket $__item)"

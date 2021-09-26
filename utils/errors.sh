@@ -29,6 +29,6 @@ function exit_if_not_equals {
     __code=${3:-1}
 
     exit_if "[ \"\$$__env_variable\" != \"$__target_value\" ]" \
-        "$__env_variable env variable accepts value which is different from expected (expected $__target_value, got \$$__env_variable) $__message"
+        "$__env_variable env variable accepts value which is different from expected (expected $__target_value, got \$$__env_variable)"
 }
 
