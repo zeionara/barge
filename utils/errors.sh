@@ -21,3 +21,14 @@ function exit_if_not_set {
     exit_if "[ -z \"\$$__env_variable\" ]" "$__env_variable env variable is not specified; $__message"
 }
 
+function exit_if_not_equals {
+    # This function handles a special case for errors - when environment variables are nor provided by the user; the first argument is the env variable name, the second one is the 
+    # message to print on errors and the last one is an optional exit code
+    __env_variable=$1
+    __target_value=$2
+    __code=${3:-1}
+
+    exit_if "[ \"\$$__env_variable\" != \"$__target_value\" ]" \
+        "$__env_variable env variable accepts value which is different from expected (expected $__target_value, got \$$__env_variable) $__message"
+}
+

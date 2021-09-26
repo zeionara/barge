@@ -21,6 +21,9 @@ copy_array __items parsed_options
 
 function unwrap_optional_and_set_flag {
     joined_options="$current_option $next_option"
+    if [ -z "$__dropped_trailing_bracket" ]; then
+        __dropped_trailing_bracket=0
+    fi
     is_optional_execution_result=$(is_optional "$joined_options" $__dropped_trailing_bracket)
 
     # echo $__dropped_trailing_bracket

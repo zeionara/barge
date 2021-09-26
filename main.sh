@@ -1,7 +1,12 @@
 #!/bin/bash
 
 export BARGE_ROOT=$HOME/barge
-export BARGE_OPTIONS="[f|foo-bar ... = 'baz qux'] c|corge-grault ... [garply = 'one two three'] [p|plugh-xyyzy = oops]"
+
+__suppress_output=1
+if [ -z "$BARGE_OPTIONS" ]; then
+    export BARGE_OPTIONS="[f|foo-bar ... = 'baz qux'] c|corge-grault ... [garply = 'one two three'] [p|plugh-xyyzy = oops]"
+    __suppress_output=0
+fi
 
 space_replacement="<<SPACE>>"
 
@@ -22,8 +27,10 @@ else
     source $BARGE_ROOT/parse.sh "$input_line" "$space_replacement"
 fi
 
-echo "CORGE_GRAULT='$CORGE_GRAULT'"
-echo "FOO_BAR='$FOO_BAR'"
-echo "GARPLY='$GARPLY'"
-echo "PLUGH_XYYZY='$PLUGH_XYYZY'"
+if [ $__suppress_output -eq 0 ]; then
+    echo "CORGE_GRAULT='$CORGE_GRAULT'"
+    echo "FOO_BAR='$FOO_BAR'"
+    echo "GARPLY='$GARPLY'"
+    echo "PLUGH_XYYZY='$PLUGH_XYYZY'"
+fi
 
