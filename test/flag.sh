@@ -31,3 +31,30 @@ function run_unitary_flag_test_with_default_value_consisting_of_one_word_given_i
     exit_if_not_equals "FOO_BAR" 'baz'
 }
 
+function run_unitary_flag_test_with_two_preconfigured_values_with_default_option {
+    export BARGE_OPTIONS="[f|foo-bar = baz|zab]"
+    source $BARGE_ROOT/main.sh
+    
+    exit_if_not_equals "FOO_BAR" 'baz'
+}
+
+function run_unitary_flag_test_with_two_preconfigured_values_with_provided_option {
+    export BARGE_OPTIONS="[f|foo-bar = baz|zab]"
+    source $BARGE_ROOT/main.sh -f
+    
+    exit_if_not_equals "FOO_BAR" 'zab'
+}
+
+function run_unitary_flag_test_with_two_preconfigured_values_with_default_option_and_spaces {
+    export BARGE_OPTIONS="[f|foo-bar = ' baz|za b']"
+    source $BARGE_ROOT/main.sh
+    
+    exit_if_not_equals "FOO_BAR" ' baz'
+}
+
+function run_unitary_flag_test_with_two_preconfigured_values_with_provided_option_and_spaces {
+    export BARGE_OPTIONS="[f|foo-bar = ' baz|za b']"
+    source $BARGE_ROOT/main.sh -f
+    
+    exit_if_not_equals "FOO_BAR" 'za b'
+}

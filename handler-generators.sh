@@ -33,7 +33,7 @@ function generate_flag_handler {
     # Generate option handler which can be used in the body of a case block (this chunk of code must not be reindented to avoid errors)
 handler=$(cat <<- END
     -$option_short_name|--$option_full_name)
-        export $option_value_holder=1
+        if [ \${#alternatives_$option_value_holder[@]} -eq 2 ]; then export $option_value_holder=\${alternatives_$option_value_holder[1]}; else export $option_value_holder=1; fi
         ;;
 END
 )

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+quote="'"
+
 # Cant use an explicit call to the procedure defined in other file because this file has not been imported yet
 if [ -z $BARGE_ROOT ]; then
     echo "BARGE_ROOT env variable is not specified; please declare the path to the root folder of the cloned barge repository"
@@ -51,7 +53,7 @@ function fetch_default_argument {
     __n_joined_strings=0
     for (( __j=$1; __j<$__array_length; __j++ )); do
         eval "__item=\${$__array_name[$__j]}"
-        # echo "FETCHING $__item"
+        echo "FETCHING $__item"
         __n_joined_strings=$((__n_joined_strings + 1))
         
         if [ "${__item:0:1}" == "'" ]; then
@@ -85,7 +87,9 @@ function fetch_default_argument {
             __default_argument="$__default_argument $__item_without_trailing_bracket"
         fi
 
-        if [ ${__default_argument:$((${#__default_argument} - 1)):1} == "'" ]; then
+        if ( [ ${__default_argument:$((${#__default_argument} - 1)):1} == "'" ] && [ ${#__default_argument[@]} -gt 1 ] ); then
+            echo $__default_argument
+            echo ${#__default_argument[@]}
             break
         fi
     done
@@ -98,6 +102,7 @@ implicit_arg_keepers=()
 j_=0 # Index for current option handler
 required_options=()
 k=0 # Index for current required option keeper (env variable name which later can be checked for emptiness)
+echo ${parsed_options[@]}
 for (( j=0; j<${#parsed_options[@]}; j++ )); do
     current_option=${parsed_options[j]}
     next_option=${parsed_options[$((j + 1))]}
@@ -107,7 +112,9 @@ for (( j=0; j<${#parsed_options[@]}; j++ )); do
 
     # echo ">$following_option<"
     if [ "${next_option:0:1}" != "[" ] && [ "$following_option" == "=" ]; then
+        echo ${parsed_options[$((j + 3))]}
         fetch_default_argument $((j + 3)) 'parsed_options'
+        echo "--"
         # echo "next before = $next_option"
         # echo "default argument = $__default_argument"
     fi
@@ -128,9 +135,10 @@ for (( j=0; j<${#parsed_options[@]}; j++ )); do
     
     # echo "SPLT $current_option"
     split_string "$current_option" "|"
-    if [ ${#__items[@]} -eq 2 ]; then
+    copy_array __items option_parts 
+    if [ ${#option_parts[@]} -eq 2 ]; then
         if [ "$next_option" == "..." ]; then
-            arg_keeper=$(as_constant_name ${__items[1]})
+            arg_keeper=$(as_constant_name ${option_parts[1]})
             if [ ! -z "$__default_argument" ]; then
                 eval "export $arg_keeper=$__default_argument"
             else
@@ -138,27 +146,47 @@ for (( j=0; j<${#parsed_options[@]}; j++ )); do
             fi
             # echo $FOO_BAR
             # echo $__default_argument
-            option_handlers[$j_]=$(generate_option_handler ${__items[1]} ${__items[0]} $arg_keeper)
+            option_handlers[$j_]=$(generate_option_handler ${option_parts[1]} ${option_parts[0]} $arg_keeper)
             j_=$((j_ + 1))
             j=$((j + 1))
         else
-            arg_keeper=$(as_constant_name ${__items[1]})
-            # echo $__default_argument
+            arg_keeper=$(as_constant_name ${option_parts[1]})
+            echo $__default_argument
             if [ ! -z "$__default_argument" ]; then
-                eval "export $arg_keeper=$__default_argument"
+                split_string "$__default_argument" "|"
+                # echo ${__items[@]}
+                # echo $(eval "\${#alternatives_$args_keeper[@]}")
+                if [ ${#__items[@]} -eq 2 ]; then
+                    copy_array __items "alternatives_$arg_keeper"
+                    # eval "echo \${#alternatives_$arg_keeper[@]}"
+                    get_unquoted_value="echo \"${__items[0]}\" | sed \"s/'//g\""
+                    echo "foo"
+                    unquoted_value=$(eval "$get_unquoted_value")
+                    echo "$unquoted_value"
+                    export $arg_keeper="$unquoted_value"
+
+                    get_unquoted_value="echo \"${__items[1]}\" | sed \"s/'//g\""
+                    unquoted_value=$(eval "$get_unquoted_value")
+                    eval "alternatives_$arg_keeper[1]=\"$unquoted_value\""
+                else
+                    eval $(echo "export $arg_keeper='$__default_argument'" | sed "s/''/'/g")
+                    # echo $(echo "export $arg_keeper='$__default_argument'" | sed "s/''/'/g")
+                fi
             else
                 export $arg_keeper=0
                 # unset $arg_keeper
             fi
             # export $arg_keeper=0
-            option_handlers[$j_]=$(generate_flag_handler ${__items[1]} ${__items[0]} $arg_keeper)
+            option_handlers[$j_]=$(generate_flag_handler ${option_parts[1]} ${option_parts[0]} $arg_keeper)
+            # echo ${option_handlers[$j_]}
+            # eval "echo \${#alternatives_$arg_keeper[@]}"
             j_=$((j_ + 1))
         fi
         if [ $is_optional_execution_result -eq 0 ]; then
             required_options[$k]=$arg_keeper
             k=$((k + 1))
         fi
-    elif [ ${#__items[@]} -eq 1 ]; then
+    elif [ ${#option_parts[@]} -eq 1 ]; then
         arg_keeper=$(as_constant_name $current_option)
         # echo "DEF $__default_argument"
         append "implicit_arg_keepers" "$arg_keeper"
