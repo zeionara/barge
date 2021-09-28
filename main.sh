@@ -5,6 +5,14 @@ export BARGE_ROOT=$HOME/barge
 __suppress_output=1
 if [ -z "$BARGE_OPTIONS" ]; then
     export BARGE_OPTIONS="[f|foo-bar ... = 'baz qux'] c|corge-grault ... [garply = 'one two three'] [p|plugh-xyyzy = oops|spoo]"
+    export BARGE_DESCRIPTION="Demo command-line tool configuration using barge scripts"
+    # export BARGE_OPTION_DESCRIPTIONS=()
+    # BARGE_OPTION_DESCRIPTIONS[0]='foo - a named option'
+    export BARGE_OPTION_DESCRIPTIONS=( \
+        'foo - a named option' \
+        'corge-grault - a named option which must be explicitly set in a call' \
+        'garply - an argument with a default value' \
+    )
     __suppress_output=0
 fi
 

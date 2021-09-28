@@ -53,7 +53,7 @@ function fetch_default_argument {
     __n_joined_strings=0
     for (( __j=$1; __j<$__array_length; __j++ )); do
         eval "__item=\${$__array_name[$__j]}"
-        echo "FETCHING $__item"
+        # echo "FETCHING $__item"
         __n_joined_strings=$((__n_joined_strings + 1))
         
         if [ "${__item:0:1}" == "'" ]; then
@@ -87,9 +87,10 @@ function fetch_default_argument {
             __default_argument="$__default_argument $__item_without_trailing_bracket"
         fi
 
-        if ( [ ${__default_argument:$((${#__default_argument} - 1)):1} == "'" ] && [ ${#__default_argument[@]} -gt 1 ] ); then
-            echo $__default_argument
-            echo ${#__default_argument[@]}
+        # echo ${#__default_argument[@]}
+        if ( [ ${__default_argument:$((${#__default_argument} - 1)):1} == "'" ] && [ ${#__default_argument} -gt 1 ] ); then
+            # echo $__default_argument
+            # echo ${#__default_argument[@]}
             break
         fi
     done
@@ -102,19 +103,20 @@ implicit_arg_keepers=()
 j_=0 # Index for current option handler
 required_options=()
 k=0 # Index for current required option keeper (env variable name which later can be checked for emptiness)
-echo ${parsed_options[@]}
+# echo ${parsed_options[@]}
 for (( j=0; j<${#parsed_options[@]}; j++ )); do
     current_option=${parsed_options[j]}
     next_option=${parsed_options[$((j + 1))]}
     following_option=${parsed_options[$((j + 2))]}
     __default_argument=''
     # echo $current_option
+    # echo $current_option
 
     # echo ">$following_option<"
     if [ "${next_option:0:1}" != "[" ] && [ "$following_option" == "=" ]; then
-        echo ${parsed_options[$((j + 3))]}
+        # echo ${parsed_options[$((j + 3))]}
         fetch_default_argument $((j + 3)) 'parsed_options'
-        echo "--"
+        # echo "--"
         # echo "next before = $next_option"
         # echo "default argument = $__default_argument"
     fi
@@ -123,6 +125,8 @@ for (( j=0; j<${#parsed_options[@]}; j++ )); do
         fetch_default_argument $((j + 2)) 'parsed_options'
         # echo "default argument = $__default_argument"
     fi
+    
+    # echo "default argument = $__default_argument"
 
     # echo $current_option $next_option
     # echo $following_option
@@ -140,6 +144,7 @@ for (( j=0; j<${#parsed_options[@]}; j++ )); do
         if [ "$next_option" == "..." ]; then
             arg_keeper=$(as_constant_name ${option_parts[1]})
             if [ ! -z "$__default_argument" ]; then
+                # echo "export $arg_keeper=$__default_argument"
                 eval "export $arg_keeper=$__default_argument"
             else
                 unset $arg_keeper
@@ -151,7 +156,7 @@ for (( j=0; j<${#parsed_options[@]}; j++ )); do
             j=$((j + 1))
         else
             arg_keeper=$(as_constant_name ${option_parts[1]})
-            echo $__default_argument
+            # echo $__default_argument
             if [ ! -z "$__default_argument" ]; then
                 split_string "$__default_argument" "|"
                 # echo ${__items[@]}
@@ -160,9 +165,9 @@ for (( j=0; j<${#parsed_options[@]}; j++ )); do
                     copy_array __items "alternatives_$arg_keeper"
                     # eval "echo \${#alternatives_$arg_keeper[@]}"
                     get_unquoted_value="echo \"${__items[0]}\" | sed \"s/'//g\""
-                    echo "foo"
+                    # echo "foo"
                     unquoted_value=$(eval "$get_unquoted_value")
-                    echo "$unquoted_value"
+                    # echo "$unquoted_value"
                     export $arg_keeper="$unquoted_value"
 
                     get_unquoted_value="echo \"${__items[1]}\" | sed \"s/'//g\""
@@ -227,8 +232,26 @@ if [ ! -z $space_replacement ]; then
 fi
 
 # Execute the main loop of the arguments parsing
+BARGE_DESCRIPTION=${BARGE_DESCRIPTION:-"Command-line tool $0"}
+
 implicit_args=() 
 for (( i=0; i<${#command_line_options[@]}; i++ )); do
+    if ( [ "${command_line_options[$i]}" == '-h' ] || [ "${command_line_options[$i]}" == '--help' ] ); then
+        if [ ${#command_line_options[@]} -gt 1 ]; then
+            echo "No additional options are allowed when asking for help"
+            exit 1
+        fi
+        echo $BARGE_DESCRIPTION
+        echo "Usage:"
+        echo "$0 $BARGE_OPTIONS"
+
+        if [ ! -z "$BARGE_OPTION_DESCRIPTIONS" ]; then
+            for (( i=0; i<${#BARGE_OPTION_DESCRIPTIONS[@]}; i++ )); do
+                echo ${BARGE_OPTION_DESCRIPTIONS[$i]}
+            done
+        fi
+        exit 0
+    fi
     eval $handlers
 done
 
