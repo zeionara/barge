@@ -86,3 +86,25 @@ function drop_trailing_bracket {
     fi
 }
 
+function compare_output_with_file {
+    __command=$1 # command to execute
+    __file=$2 # command containing reference text for comparison with the provided command output
+    __tmp_file=${3:-'assets/test/__tmp.txt'}
+
+    mkdir -p "$(echo $__tmp_file | rev | cut -d/ -f2- | rev)"
+
+    eval "$__command" >> $__tmp_file
+
+    if [ ! -z "$(diff $2 $__tmp_file)" ]; then
+        echo "Output is different from expected"
+        echo "Expected:"
+        cat $2
+        echo "Actual:"
+        cat $__tmp_file
+        rm $__tmp_file
+        exit 1
+    fi
+    
+    rm $__tmp_file 
+}
+
