@@ -1,0 +1,6 @@
+**/*.swp
+**/*__.*
+tags
+
+array-test.sh
+

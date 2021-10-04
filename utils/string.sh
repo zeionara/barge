@@ -95,6 +95,10 @@ function compare_output_with_file {
 
     eval "$__command" >> $__tmp_file
 
+    # echo ">>>"
+    # cat $__tmp_file
+    # echo ">>>"
+
     if [ ! -z "$(diff $2 $__tmp_file)" ]; then
         echo "Output is different from expected"
         echo "Expected:"

@@ -1,6 +1,7 @@
 #!/bin/bash
 
 source $BARGE_ROOT/utils/string.sh
+source $BARGE_ROOT/utils/files.sh
 
 function run_unitary_named_option_test {
     export BARGE_OPTIONS="[f|foo-bar ...]"
@@ -36,11 +37,26 @@ function run_unitary_named_option_test_with_default_value_consisting_of_one_word
 function run_help_option_test_passing_only_description {
     export BARGE_DESCRIPTION='Foo bar'
     export BARGE_OPTIONS='[f|foo-bar ...]'
+
+    replace_option_descriptions_in_main
+
     compare_output_with_file './main.sh -h' 'assets/test/help-option/only-description.txt'
+
+    return_original_version_of_main
 }
 
 function run_help_option_test_passing_description_and_options {
     export BARGE_DESCRIPTION='Foo bar'
     export BARGE_OPTIONS='[f|foo-bar ...]'
-    compare_output_with_file "export BARGE_OPTION_DESCRIPTIONS=bib; ./main.sh -h" 'assets/test/help-option/description-and-options.txt'
+    export BARGE_OPTION_DESCRIPTIONS=(\
+        'baz' \
+        'qux quux' \
+        'quuz corge grault' \
+    )
+
+    replace_option_descriptions_in_main
+
+    compare_output_with_file "./main.sh -h" 'assets/test/help-option/description-and-options.txt'
+
+    return_original_version_of_main
 }
