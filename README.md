@@ -4,10 +4,12 @@ Barge - **ba**sh **arg**um**e**nt parser - simple yet powerful tool for parsing 
 
 ## Usage
 
-The key script of the project at the time is contained in the file `parse.sh`, which specifies varible `option_list` containing all the available options in the following format:
-- `<SHORT_NAME>|<FULL_NAME> ...` - for named options, where both names can be applied for the argument recognition. For instance, argument `corge-grault` can be defined as `c|corge-grault` meaning that value for this argument can be set using either format `-c foo` either `--corge-grault foo`. As a result of option list parsing, the option is written into a local env variable - for the example discussed above value `foo` will be put into env variable `CORGE_GRAULT`;
-- `<FULL_NAME>` - for arguments, where the argument name reflects the env variable which will contain the argument parsing result. For instance, if you want to save the first argument passed via cli to your program under name `GARPLY`, you would specify this argument as `garply`;
-- `<SHORT_NAME>|<FULL_NAME>` - for flags, in which in case the option is presented in a call then appropriate env variable will accept the value of `1`; in the opposite circumstances it will be equal to `0`.
+The key script of the project at the time is contained in the file `parse.sh`, which uses the variable `BARGE_OPTIONS`` containing all the available command-line option specifications in the following format:
+- `<SHORT_NAME>|<FULL_NAME> ... = <DEFAULT_VALUE>` - for named options, where both names can be applied for the argument recognition. For instance, argument `corge-grault` can be defined as `c|corge-grault` meaning that value for this argument can be set using either format `-c foo` either `--corge-grault foo`. As a result of option list parsing, the option is written into a local env variable - for the example discussed above value `foo` will be put into env variable `CORGE_GRAULT`; if no value is provided by the caller, the respective environment variable will be filled with the default value if it is provided - in other case it will just not be assigned with any value;
+- `<FULL_NAME> = <DEFAULT_VALUE>` - for arguments, where the argument name reflects the env variable which will contain the argument parsing result. For instance, if you want to save the first argument passed via cli to your program under name `GARPLY`, you would specify this argument as `garply`; the default-value semantics is similar to that of the named options;
+- `<SHORT_NAME>|<FULL_NAME> = <VALUE_IF_SET>|<VALUE_IF_NOT_SET>` - for flags, in which in case the option is presented in a call then appropriate env variable will accept the value of `1`; in the opposite circumstances it will be equal to `0`. If default value is provided without symbol `|` then in case the option is set by the caller, the env variable will accept the given default value. If the default value consists of two parts separated by the character `|`, then if flag is set in the script call, part of default value coming before the separator will be stored as the env variable content; if the flag is not set, the part of string after the vertical line will be set up as the env variable value.
+
+There is one default flag which is predefined and thus forbidden for the custom options specification. The flag is `-h|--help` which makes the program print help message. The printed help message may be customized via env variables `BARGE_DESCRIPTION` and `BARGE_OPTION_DESCRIPTIONS`. The former contains the text which provides an explanaiton of the whole script, and the latter contains a list of strings each of which describes an available command-line argument. Both env variables are optional and in case they are not provided, the default values are generated (concerning `BARGE_OPTION_DESCRIPTIONS` env variable, empty list is used by default because since it's not clear which format of argument description one would prefer). 
 
 Aside from what is said earlier, every option can be put into square brackets (`[]`), which means that passing that option is not necessary in a program call. The options, arguments and flags, which are not declared inside square brackets are considered required and the script will be exited on attempts of invoking the `parse.sh` script without providing values for these parameters. The respective message will be written into the console so to allow user to understand what is wrong in their actions.
 
@@ -84,4 +86,8 @@ If we try to run this command, we will obtain a comprehensive message and the sc
 ```sh
 CORGE_GRAULT env variable is not specified; required option CORGE_GRAULT is not set, please add the respective value to the call
 ```
+
+## Testing
+
+To run tests for making sure that everything works fine, execute script `test.sh` located at the repository root. The result of correct tests execution must contain a total number of passed tests.
 
